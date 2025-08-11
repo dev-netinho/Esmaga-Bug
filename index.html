@@ -1,13 +1,20 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Esmaga-Bug: Edição Lendária</title>
+    <title>Esmaga-Bug: Edição Final</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="matrix-background"></canvas>
+    <div id="background-container">
+        <canvas id="matrix-layer-far" class="matrix-canvas"></canvas>
+        <canvas id="matrix-layer-mid" class="matrix-canvas"></canvas>
+        <canvas id="matrix-layer-near" class="matrix-canvas"></canvas>
+    </div>
 
     <div id="game-container">
         <div class="game-info-wrapper">
@@ -17,15 +24,23 @@
                 <span class="score-box">SCORE: <span id="score-display">0</span></span>
             </div>
             <div class="info-bar-bottom">
-                <span class="score-box">TEMPO: <span id="timer-display">60</span></span>
+                <span class="score-box">TEMPO: <span id="timer-display">40</span></span>
                 <span class="score-box">COMBO: <span id="combo-display">x1</span></span>
                 <span class="score-box">BUFFS: <span id="buff-inventory">0</span></span> 
             </div>
+            <div class="use-buff-container">
+                <button id="use-buff-button" disabled>Usar Buff (D)</button>
+            </div>
         </div>
 
-        <div id="game-screen">
-            <div id="buff-effect-overlay"></div>
-            <button id="start-button">Iniciar Jogo</button>
+        <div id="game-screen-wrapper"> <div id="game-screen">
+                </div>
+            <div id="epic-buff-overlay"></div>
+            <div id="start-stop-message" class="hidden">
+                <p id="message-title"></p>
+                <p id="message-score"></p>
+                <button id="start-button">Iniciar Jogo</button>
+            </div>
         </div>
     </div>
 

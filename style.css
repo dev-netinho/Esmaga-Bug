@@ -1,93 +1,125 @@
-/* --- ESTILOS GERAIS E MOBILE-FIRST (BASE) --- */
+/* --- FONTES E ESTILOS GERAIS --- */
 :root {
+    --font-title: 'Press Start 2P', cursive;
+    --font-body: 'Source Code Pro', monospace;
     --font-size-base: 14px;
     --font-size-info: 1em;
-    --font-size-title: 1.8em;
+    --font-size-title: 1.5em; /* Ajustado para a nova fonte */
 }
 body, html {
-    height: 100%; margin: 0; overflow: hidden; background-color: #000; color: #abb2bf; font-family: 'Courier New', Courier, monospace;
+    height: 100%; margin: 0; overflow: hidden; background-color: #000;
+    color: #ccc; font-family: var(--font-body);
 }
-#matrix-background {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; filter: blur(1px);
+
+/* --- FUNDO PARALLAX E REATIVO --- */
+#background-container {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+    transition: transform 0.1s ease-out;
 }
+#background-container.glitch {
+    animation: glitch 0.2s 1;
+}
+@keyframes glitch {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(5px, -5px); }
+    50% { transform: translate(-5px, 5px); }
+    75% { transform: translate(5px, 5px); }
+    100% { transform: translate(0, 0); }
+}
+.matrix-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+#matrix-layer-far { opacity: 0.2; }
+#matrix-layer-mid { opacity: 0.4; }
+#matrix-layer-near { opacity: 0.7; }
+
+/* --- CONTAINER PRINCIPAL DO JOGO --- */
 #game-container {
     position: relative; z-index: 2; display: flex; flex-direction: column; width: 100%; height: 100%; padding: 10px; box-sizing: border-box;
 }
-.game-info-wrapper {
-    flex-shrink: 0; padding-bottom: 10px;
-}
+.game-info-wrapper { flex-shrink: 0; padding-bottom: 10px; }
 h1 {
     color: #61afef; margin: 0 0 10px 0; font-size: var(--font-size-title); text-align: center;
+    font-family: var(--font-title); text-shadow: 0 0 5px #61afef;
 }
 .info-bar, .info-bar-bottom {
     font-size: var(--font-size-info); color: #98c379; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 5px;
 }
 .info-bar-bottom { color: #c678dd; }
 .score-box {
-    background-color: #282c34; padding: 5px 10px; border-radius: 5px; flex: 1 1 100px; text-align: center; white-space: nowrap;
+    background-color: #282c34; padding: 8px 12px; border-radius: 5px; flex: 1 1 100px; text-align: center; white-space: nowrap; transition: color 0.3s, transform 0.3s;
 }
 #game-screen {
-    flex-grow: 1; min-height: 200px; background-color: rgba(40, 44, 52, 0.25); border: 2px solid #61afef; border-radius: 5px; position: relative; overflow: hidden; cursor: crosshair; display: flex; justify-content: center; align-items: center;
+    flex-grow: 1; min-height: 200px; background-color: rgba(40, 44, 52, 0.5); border: 2px solid #61afef; border-radius: 5px; position: relative; overflow: hidden; cursor: crosshair; display: flex; justify-content: center; align-items: center;
+    transition: box-shadow 0.3s;
+}
+#game-screen.overrun-warning {
+    box-shadow: inset 0 0 25px 10px #e06c75; /* Alerta de tela cheia */
 }
 #start-button {
-    padding: 15px 30px; font-size: 1.5em; cursor: pointer; background-color: #98c379; color: #21252b; border: none; border-radius: 5px; z-index: 100;
+    padding: 15px 30px; font-size: 1.5em; cursor: pointer; background-color: #98c379; color: #21252b;
+    border: none; border-radius: 5px; z-index: 100; font-family: var(--font-title);
+    opacity: 1; transition: opacity 0.5s;
 }
+.use-buff-container { margin-top: 10px; }
+#use-buff-button {
+    width: 100%; padding: 10px; font-size: 1.1em; font-family: var(--font-body); font-weight: 700;
+    background-color: #00ffcc; color: #21252b; border: none; border-radius: 5px; cursor: pointer;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+#use-buff-button:disabled { background-color: #5c6370; opacity: 0.5; cursor: not-allowed; }
 
-/* --- ESTILOS DOS ELEMENTOS DO JOGO --- */
+/* Mensagem de Início/Fim de Jogo */
+#start-stop-message {
+    position: absolute; color: white; background-color: rgba(0,0,0,0.7); padding: 30px; border-radius: 10px;
+    z-index: 99; text-align: center; transition: opacity 0.5s;
+}
+#message-title { font-family: var(--font-title); font-size: 2em; margin: 0 0 10px 0; }
+#message-score { font-size: 1.2em; margin: 0; }
+.hidden { opacity: 0; pointer-events: none; }
+
+
+/* --- ESTILOS E ANIMAÇÕES DOS ELEMENTOS DO JOGO --- */
 
 .bug, .boss-bug, .buff-item {
     position: absolute; background-size: contain; background-repeat: no-repeat; cursor: pointer;
     animation: emerge 0.5s ease-out;
 }
-
-/* Ícone do bug normal atualizado para o seu arquivo local */
-.bug { 
-    width: 50px; height: 50px; 
-    background-image: url('assets/bug.png');
+/* Animação Idle dos Bugs */
+.bug, .boss-bug { animation: emerge 0.5s ease-out, tremble 3s ease-in-out infinite; }
+@keyframes tremble {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(1px, -1px) rotate(-1deg); }
+    40% { transform: translate(-1px, 1px) rotate(1deg); }
+    60% { transform: translate(1px, 1px) rotate(0deg); }
+    80% { transform: translate(-1px, -1px) rotate(-1deg); }
 }
 
-/* Ícone do boss bug também atualizado para o seu arquivo local */
-.boss-bug {
-    width: 85px; height: 85px; 
-    background-image: url('assets/bug.png'); /* Usando o mesmo bug, porém maior */
-}
-
-/* Ícone do buff atualizado para o seu arquivo local */
+.bug { width: 50px; height: 50px; background-image: url('assets/bug.png'); }
+.boss-bug { width: 85px; height: 85px; background-image: url('assets/bug.png'); }
 .buff-item {
-    width: 55px; height: 55px; 
-    background-image: url('assets/buff.png');
-    filter: drop-shadow(0 0 8px #00ffcc);
-    animation: emerge 0.5s ease-out, float 2s ease-in-out infinite;
+    width: 55px; height: 55px; background-image: url('assets/buff.png');
+    filter: drop-shadow(0 0 8px #00ffcc); animation: emerge 0.5s ease-out, float 2s ease-in-out infinite;
 }
 
+/* Efeito de Dano no Boss */
+.boss-bug.damaged { animation: damage-flash 0.1s 2; }
+@keyframes damage-flash { to { filter: brightness(5); } }
 
-#buff-effect-overlay {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 1px; height: 1px;
-    background: radial-gradient(circle, rgba(0,255,204,0.7) 0%, rgba(97,175,239,0.3) 40%, rgba(97,175,239,0) 70%);
-    border-radius: 50%; z-index: 200; pointer-events: none; display: none;
+/* Efeito Épico do Buff */
+#epic-buff-overlay {
+    position: absolute; top: 50%; left: 50%; width: 55px; height: 55px;
+    background-image: url('assets/buff.png'); background-size: contain; background-repeat: no-repeat;
+    z-index: 200; pointer-events: none; transform: translate(-50%, -50%) scale(0); opacity: 0;
 }
-#buff-effect-overlay.active {
-    display: block; animation: buff-explosion 0.8s ease-out forwards;
+#epic-buff-overlay.active { animation: epic-buff-animation 1.2s ease-out forwards; }
+@keyframes epic-buff-animation {
+    0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 0.8; }
+    70% { transform: translate(-50%, -50%) scale(8) rotate(720deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(10) rotate(720deg); opacity: 0; }
 }
 
-/* --- ANIMAÇÕES --- */
-@keyframes emerge {
-    from { transform: scale(0.1); opacity: 0; filter: blur(5px); }
-    to { transform: scale(1); opacity: 1; filter: blur(0); }
-}
-@keyframes float {
-    0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); }
-}
-.hit { animation: hit 0.2s; }
-@keyframes hit { 50% { filter: brightness(3); } }
-@keyframes buff-explosion {
-    from { width: 1px; height: 1px; opacity: 1; }
-    to { width: 200%; height: 200%; opacity: 0; }
-}
-.bug-vanishing, .boss-bug-vanishing {
-    animation: vanish 0.3s ease-in forwards;
-}
+.bug-vanishing, .boss-bug-vanishing { animation: vanish 0.3s ease-in forwards; }
 @keyframes vanish {
     0% { filter: brightness(10) drop-shadow(0 0 15px white); transform: scale(1.2); }
     100% { filter: brightness(0); transform: scale(0); opacity: 0; }
@@ -95,9 +127,25 @@ h1 {
 
 /* --- MEDIA QUERIES --- */
 @media (min-width: 1024px) {
-    :root { --font-size-base: 16px; }
+    :root { --font-size-base: 16px; --font-size-title: 2em; }
     #game-container { flex-direction: row; gap: 20px; align-items: stretch; width: 95vw; height: 95vh; max-width: 1400px; }
     .game-info-wrapper { flex: 0 0 280px; display: flex; flex-direction: column; justify-content: center; padding-bottom: 0; }
     .info-bar, .info-bar-bottom { flex-direction: column; }
+    .use-buff-container { margin-top: auto; padding-top: 15px; }
     #game-screen { min-height: initial; }
+}
+
+#game-screen-wrapper {
+    flex-grow: 1;
+    min-height: 200px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-screen {
+    width: 100%;
+    height: 100%;
+    /* O resto do estilo de #game-screen permanece o mesmo */
 }
